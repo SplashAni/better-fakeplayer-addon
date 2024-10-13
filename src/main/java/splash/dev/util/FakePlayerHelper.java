@@ -5,7 +5,6 @@ import meteordevelopment.meteorclient.utils.entity.fakeplayer.FakePlayerEntity;
 import meteordevelopment.meteorclient.utils.entity.fakeplayer.FakePlayerManager;
 import meteordevelopment.meteorclient.utils.player.ChatUtils;
 import meteordevelopment.orbit.EventHandler;
-import net.minecraft.util.math.Vec3d;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -13,36 +12,41 @@ import java.util.List;
 import static meteordevelopment.meteorclient.MeteorClient.mc;
 
 public class FakePlayerHelper {
-    List<Position> positions = new ArrayList<>();
+    List<Recording> recordings = new ArrayList<>();
     FakePlayerEntity fakePlayerEntity;
+    int currentPlayTicks = 0;
     private boolean recording = false;
     private boolean playing = false;
-    int currentPlayTicks = 0;
 
     @EventHandler
-    public void onTick(TickEvent.Pre event) {
-        if (mc.world == null || mc.player == null) return;
-
+    public void onTick(TickEvent.Post event) {
         if (recording) {
-            positions.add(new Position(mc.player.getPos(), mc.player.getYaw(), mc.player.getPitch()));
+
+
+            recordings.add(new Recording(
+                mc.player.getPos(), mc.player.getYaw(), mc.player.getPitch(), mc.player.getPose()
+            ));
         }
 
+
         if (playing) {
-            if (positions.isEmpty()) {
+            if (recordings.isEmpty()) {
                 ChatUtils.error("No recorded positions to play.");
                 playing = false;
                 return;
             }
 
-            Position position = positions.get(currentPlayTicks % positions.size());
+            Recording recording = recordings.get(currentPlayTicks % recordings.size());
+
             if (fakePlayerEntity != null) {
-                fakePlayerEntity.setPosition(position.pos());
-                fakePlayerEntity.setYaw(position.yaw());
-                fakePlayerEntity.setPitch(position.pitch());
 
+                fakePlayerEntity.setPose(fakePlayerEntity.getPose());
+                fakePlayerEntity.setPosition(recording.pos());
+                fakePlayerEntity.updateLimbs(false);
+                fakePlayerEntity.setAngles(recording.yaw(), recording.pitch());
+
+                currentPlayTicks++;
             }
-
-            currentPlayTicks++;
         }
     }
 
@@ -50,7 +54,7 @@ public class FakePlayerHelper {
         if (recording) {
             ChatUtils.error("Already recording...");
         } else {
-            positions.clear();
+            recordings.clear();
             recording = true;
             ChatUtils.info("Started recording...");
         }
@@ -68,7 +72,7 @@ public class FakePlayerHelper {
             return;
         }
 
-        if (positions.isEmpty()) {
+        if (recordings.isEmpty()) {
             ChatUtils.error("No positions recorded.");
             return;
         }
