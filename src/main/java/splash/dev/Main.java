@@ -11,6 +11,8 @@ import org.slf4j.Logger;
 import splash.dev.commands.FakePlayerCommand;
 import splash.dev.util.FakePlayerHelper;
 
+import static meteordevelopment.meteorclient.MeteorClient.mc;
+
 public class Main extends MeteorAddon {
     public static final Logger LOG = LogUtils.getLogger();
     public static final Category CATEGORY = new Category("Example");
@@ -22,6 +24,7 @@ public class Main extends MeteorAddon {
 
         Commands.add(new FakePlayerCommand());
         MeteorClient.EVENT_BUS.subscribe(getFakePlayerHelper());
+
 
     }
 

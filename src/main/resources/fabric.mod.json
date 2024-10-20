@@ -20,6 +20,7 @@
   "mixins": [
     "addon-template.mixins.json"
   ],
+  "accessWidener": "modid.accesswidener",
   "custom": {
     "meteor-client:color": "225,25,25"
   },
